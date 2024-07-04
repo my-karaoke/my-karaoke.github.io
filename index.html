@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch/templates/basic_search.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .wrapper {
+        max-width: 800px;
+        width: 100%;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      #searchbox {
+        margin-bottom: 20px;
+      }
+
+
+      .ais-SearchBox-input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+
+      .ais-Hits-item {
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .ais-Hits-item:last-child {
+        border-bottom: none;
+      }
+
+      .hit-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .hit-singer {
+        font-size: 16px;
+        color: #666;
+      }
+
+      .ais-Highlight-highlighted {
+        background-color: #ffecb3;
+        padding: 2px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div id="searchbox" focus></div>
+      <div id="hits"></div>
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/@meilisearch/instant-meilisearch/dist/instant-meilisearch.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4"></script>
+  <script>
+    const searchClient = instantMeiliSearch(
+      "https://csw-meilisearch.up.railway.app",
+      "40db54d9ebd0d8808f4a1d3583422d15530936254ee7dd7c2ce81c96299c27be" // only allowing SEARCH action
+    ).searchClient;
+
+    const search = instantsearch({
+      indexName: "songs",
+      searchClient: searchClient
+    });
+
+    search.addWidgets([
+      instantsearch.widgets.searchBox({
+        container: "#searchbox",
+        placeholder: "TJ미디어 노래 검색..",
+      }),
+      instantsearch.widgets.configure({
+        hitsPerPage: 8,
+        attributesToRetrieve: ['title', 'singer'],
+        displayedAttributes: ['title', 'singer']
+      }),
+      instantsearch.widgets.hits({
+        container: "#hits",
+        templates: {
+          item: `
+            <div class="ais-Hits-item">
+              <div class="hit-title">{{#helpers.highlight}}{ "attribute": "title" }{{/helpers.highlight}}</div>
+              <div class="hit-singer">{{#helpers.highlight}}{ "attribute": "singer" }{{/helpers.highlight}}</div>
+            </div>
+          `
+        }
+      })
+    ]);
+
+    search.start();
+  </script>
+</html>
